@@ -1,0 +1,63 @@
+ 
+Parameters:
+
+  ImageId:
+    Type: String
+    Description: 'Amazon Linux 2 AMI for USA us-east1 Region'
+    Default: 'ami-0cff7528ff583bf9a'
+  VpcId:
+    Type: String
+    Description: VPC id
+    Default: 'vpc-0edf1c9b4d82f86a5'
+  SubnetId:
+    Type: String
+    Description: Subnet ID
+    Default: 'subnet-0beb59a223e86d69a'
+  AvailabilityZone:
+    Type: String
+    Description: Availability Zone 
+    Default: us-east-1d
+  InstanceType:
+    Type: String
+    Description: Choosing  t2 micro because it is free
+    Default: t2.micro
+  KeyName:
+    Description: SSH Keypair to login to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: aws
+
+Resources:
+  DemoInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties: 
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      AvailabilityZone: !Ref AvailabilityZone
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          SubnetId: !Ref SubnetId
+          GroupSet: 
+            - !Ref DemoSecurityGroup
+
+  DemoSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: SG to allow SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          
+          ToPort: '22'
+          CidrIp: '0.0.0.0/0'
+      Tags:
+        - Key: Name
+          Value: SSH-SG
+
+Outputs:
+  DemoInstanceId:
+    Description: Instance Id 
+    Value: !Ref DemoInstance
